@@ -1,156 +1,88 @@
 configuration:
   immich:
     name: Immich
-    description: >-
+    description: |-
       Connexion à ton serveur Immich.
-    server:
-      name: Serveur
-      description: >-
-        URL complète de ton instance Immich, avec le port. Ex.
-        http://homeassistant.local:2283 ou http://192.168.1.10:2283
-    api_key:
-      name: Clé API
-      description: >-
-        Clé API Immich (Paramètres du compte → Clés API → Nouvelle clé,
-        avec les droits de lecture sur les personnes/albums, et écriture
-        si tu utilises person_to_album).
+      • server : URL complète avec le port, ex. http://192.168.1.205:2283
+      • api_key : clé API Immich. Pour la créer — avatar (en haut à
+        droite dans Immich) → Paramètres du compte → onglet "Clés API" →
+        "Nouvelle clé API". Droits à cocher : asset.read, album.read,
+        albumAsset.create (ajout aux albums, requis pour
+        person_to_album) — ou "Tout sélectionner" si tu ne veux pas
+        chercher chaque droit. Copie-la tout de suite, Immich ne la
+        raffiche plus jamais après.
 
   person_to_album:
     name: Person → Album
-    description: >-
-      Ajoute automatiquement les photos d'une personne reconnue à un album Immich.
-    links:
-      name: Liaisons personne → album
-      description: >-
-        Une ligne par personne à suivre. "description" est juste un libellé
-        pour t'y retrouver dans la liste, il n'est pas utilisé par le script.
-      items:
-        description:
-          name: Libellé
-          description: >-
-            Nom libre pour identifier la liaison (ex. "Mon fils").
-        person_id:
-          name: ID de la personne (Immich)
-          description: >-
-            UUID de la personne dans Immich. Va dans Immich → Explorer par
-            personnes → clique sur la personne → l'UUID est dans l'URL du
-            navigateur, après /people/
-            (ex. a1b2c3d4-e5f6-7890-abcd-ef1234567890).
-        album_id:
-          name: ID de l'album (Immich)
-          description: >-
-            UUID de l'album Immich où déposer les photos. Ouvre l'album dans
-            Immich, l'UUID est dans l'URL après /albums/
+    description: |-
+      Ajoute automatiquement les photos d'une personne reconnue à un
+      album Immich.
+      • enabled : active l'exécution planifiée.
+      • schedule : expression cron, ex. "*/30 * * * *" = toutes les 30
+        minutes.
+      • links : une ligne par personne à suivre —
+          - description : libellé libre pour t'y retrouver (ex. "Mon
+            fils"), non utilisé par le script.
+          - person_id : UUID de la personne dans Immich. Explorer par
+            personnes → clique la personne → l'UUID est dans l'URL après
+            /people/ (ex. a1b2c3d4-e5f6-7890-abcd-ef1234567890).
+          - album_id : UUID de l'album cible. Ouvre l'album → l'UUID est
+            dans l'URL après /albums/
             (ex. 98765432-1abc-4def-9012-345678abcdef).
 
   bloomin8:
     name: Optimisation BLOOMIN8
-    description: >-
+    description: |-
       Filtre l'album source par orientation et optimise les photos pour
       l'écran e-ink Spectra 6 du cadre.
-    enabled:
-      name: Activé
-      description: Active l'exécution planifiée de l'optimisation.
-    schedule:
-      name: Planification (cron)
-      description: >-
-        Expression cron standard. Ex. "0 4 * * *" = tous les jours à 4h00.
-        "*/30 * * * *" = toutes les 30 minutes.
-    album_id:
-      name: ID de l'album source (Immich)
-      description: >-
-        UUID de l'album Immich à utiliser comme source de photos pour le
-        cadre (ex. 98765432-1abc-4def-9012-345678abcdef).
-    orientation:
-      name: Orientation
-      description: >-
-        Orientation du cadre — détermine dans quel sous-dossier
-        (portrait/ ou landscape/) les photos optimisées sont déposées.
-        Doit correspondre à l'orientation configurée dans bloomin8_pull.
-    destination_path:
-      name: Dossier de destination
-      description: >-
-        Chemin sous /media où écrire les photos optimisées (doit être le
-        dossier surveillé par ton intégration bloomin8_pull, avec les
-        sous-dossiers portrait/ et landscape/ créés automatiquement).
-        Ex. /media/bloomin8
-    resolution_width:
-      name: Largeur (px)
-      description: Largeur cible en pixels, ex. 1600 pour un cadre 1600×1200.
-    resolution_height:
-      name: Hauteur (px)
-      description: Hauteur cible en pixels, ex. 1200 pour un cadre 1600×1200.
-    color_gamma:
-      name: Gamma
-      description: >-
-        Correction gamma appliquée avant dithering Spectra 6. 1.0 = neutre.
-        Ex. 0.85 pour éclaircir légèrement.
-    color_saturation:
-      name: Saturation
-      description: >-
-        Multiplicateur de saturation. 1.0 = neutre. Ex. 1.15 pour des
-        couleurs un peu plus vives (utile car l'e-ink les atténue).
-    color_lift:
-      name: Rehaussement des noirs
-      description: >-
-        Relève les tons sombres pour éviter les aplats noirs bouchés à
-        l'écran. Valeur 0-255, ex. 13.
-    color_lift_threshold:
-      name: Seuil du rehaussement
-      description: >-
-        En dessous de cette luminosité (0-255), le rehaussement des noirs
-        s'applique. Ex. 90.
+      • enabled : active l'exécution planifiée.
+      • schedule : cron, ex. "0 4 * * *" = tous les jours à 4h00.
+      • album_id : UUID de l'album Immich source (même méthode que
+        person_to_album.links.album_id ci-dessus).
+      • orientation : portrait ou landscape — détermine le sous-dossier
+        (portrait/ ou landscape/) et doit correspondre à l'orientation
+        configurée côté bloomin8_pull.
+      • destination_path : dossier sous /media surveillé par
+        bloomin8_pull, ex. /media/bloomin8 (les sous-dossiers
+        portrait/landscape sont créés automatiquement).
+      • resolution_width / resolution_height : taille cible en pixels,
+        ex. 1600 × 1200.
+      • color_gamma : correction gamma avant dithering, 1.0 = neutre,
+        ex. 0.85 pour éclaircir.
+      • color_saturation : multiplicateur de saturation, 1.0 = neutre,
+        ex. 1.15 pour des couleurs plus vives.
+      • color_lift / color_lift_threshold : rehausse les tons sombres
+        en dessous du seuil de luminosité (0-255) pour éviter les
+        aplats noirs bouchés, ex. lift=13, threshold=90.
 
   frame:
     name: Cadre BLOOMIN8
-    description: Coordonnées réseau du cadre, pour la relance manuelle/auto.
-    ip:
-      name: Adresse IP du cadre
-      description: >-
-        Juste l'adresse, sans http:// devant. Ex. 192.168.1.136 — celle
-        utilisée dans bloomin8_pull.
-    token:
-      name: Token
-      description: >-
-        Le même token d'accès que celui configuré côté bloomin8_pull
-        (custom_yaml/bloomin8.yaml, clé access_token).
+    description: |-
+      Coordonnées réseau du cadre, pour la relance manuelle/auto.
+      • ip : juste l'adresse, SANS http:// devant, ex. 192.168.1.136
+        (la même que dans bloomin8_pull).
+      • token : le même access_token que celui configuré côté
+        bloomin8_pull (custom_yaml/bloomin8.yaml).
 
   relance:
     name: Relance & intégration HA
-    description: >-
-      Paramètres pour piloter la relance du pull et, si besoin, éditer le
-      fichier YAML de l'intégration bloomin8_pull depuis ce panneau.
-    ha_url:
-      name: URL de Home Assistant
-      description: Ex. http://homeassistant.local:8123
-    ha_yaml_path:
-      name: Chemin du YAML bloomin8_pull
-      description: >-
-        Chemin relatif à /config. Ex. custom_yaml/bloomin8.yaml — laisse
-        vide si tu ne veux pas utiliser l'éditeur YAML intégré.
-    ha_device_id:
-      name: Device ID du cadre
-      description: >-
-        La CLÉ (pas le "name:") du device dans le bloc "devices:" de ton
-        fichier YAML bloomin8_pull — le numéro de série du cadre. Ex. si
-        ton YAML contient "devices: CB29695B3322ADA29D9578BD1A7B59F2:
-        name: Cadre ...", la valeur à mettre ici est
-        CB29695B3322ADA29D9578BD1A7B59F2 (pas "Cadre").
-    auto_relance_enabled:
-      name: Relance auto activée
-      description: >-
-        Si activé, relance automatiquement le pull après une période de
-        silence du cadre (voir "Délai avant relance auto" ci-dessous).
-    auto_relance_after_hours:
-      name: Délai avant relance auto (heures)
-      description: >-
-        Nombre d'heures sans pull réussi avant de déclencher une relance
-        automatique. Ex. 12.
-    notify_service:
-      name: Service de notification HA
-      description: >-
-        Nom COMPLET du service, avec le préfixe "notify." inclus — pas
-        juste la fin. Correct : notify.mobile_app_sm_g991b. Incorrect :
-        mobile_app_sm_g991b (ne marchera pas). Tu trouves le nom exact
-        dans Outils de développement → Actions, en cherchant "notify".
-        Laisse vide pour ne pas notifier.
+    description: |-
+      Pilotage de la relance du pull et, en option, édition du YAML de
+      l'intégration bloomin8_pull depuis ce panneau.
+      • ha_url : URL de Home Assistant, ex.
+        http://homeassistant.local:8123
+      • ha_yaml_path : chemin relatif à /config, ex.
+        custom_yaml/bloomin8.yaml — vide si tu n'utilises pas l'éditeur
+        YAML intégré.
+      • ha_device_id : la CLÉ (pas le "name:") sous "devices:" dans ton
+        YAML bloomin8_pull — le numéro de série du cadre, ex.
+        CB29695B3322ADA29D9578BD1A7B59F2.
+      • auto_relance_enabled : relance automatiquement après une
+        période de silence du cadre (voir auto_relance_after_hours).
+      • auto_relance_after_hours : nombre d'heures sans pull réussi
+        avant relance auto, ex. 12.
+      • notify_service : nom COMPLET du service HA, préfixe "notify."
+        inclus. Correct : notify.mobile_app_sm_g991b. Incorrect :
+        mobile_app_sm_g991b (ne marchera pas). Trouvable dans Outils de
+        développement → Actions, en cherchant "notify". Vide = pas de
+        notification.
