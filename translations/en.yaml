@@ -127,8 +127,11 @@ configuration:
     ha_device_id:
       name: Frame device ID
       description: >-
-        The frame's serial number as it appears as device_id in your
-        bloomin8_pull config, e.g. CB29695B3322ADA29D9578BD1A7B59F2.
+        The KEY (not the "name:") of the device under "devices:" in your
+        bloomin8_pull YAML file — the frame's serial number. E.g. if your
+        YAML has "devices: CB29695B3322ADA29D9578BD1A7B59F2: name: Cadre
+        ...", the value to put here is CB29695B3322ADA29D9578BD1A7B59F2
+        (not "Cadre").
     auto_relance_enabled:
       name: Auto-refresh enabled
       description: >-
@@ -142,6 +145,8 @@ configuration:
     notify_service:
       name: HA notification service
       description: >-
-        notify.* service to call to report a refresh's result
-        (success/failure). E.g. notify.mobile_app_sm_g991b — leave empty
-        to disable notifications.
+        FULL service name, including the "notify." prefix — not just the
+        end part. Correct: notify.mobile_app_sm_g991b. Wrong:
+        mobile_app_sm_g991b (won't work). Find the exact name under
+        Developer Tools → Actions, searching for "notify". Leave empty to
+        disable notifications.

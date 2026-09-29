@@ -106,7 +106,14 @@ def get_last_pull_success(cfg: dict | None = None) -> dict:
 def send_relance(cfg: dict | None = None, delay_minutes: int = 2) -> tuple[bool, str]:
     """Envoie le PUT au cadre. Retourne (succès, message)."""
     cfg = cfg or get_config()
-    frame_ip = cfg["frame"]["ip"]
+    # Tolère que l'utilisateur ait mis "http://" (ou "https://") devant
+    # l'IP dans la config — on ne veut qu'un host[:port] nu ici, quoi qu'il
+    # ait tapé (évite un "http://http://..." qui casse la résolution DNS).
+    frame_ip = cfg["frame"]["ip"].strip()
+    for prefix in ("http://", "https://"):
+        if frame_ip.lower().startswith(prefix):
+            frame_ip = frame_ip[len(prefix):]
+    frame_ip = frame_ip.rstrip("/")
     frame_token = cfg["frame"]["token"]
     ha_url = cfg["relance"]["ha_url"]
 

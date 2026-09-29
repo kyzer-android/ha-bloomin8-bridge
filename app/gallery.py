@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from common_config import destination_dir, log
+from common_config import destination_dir, get_config, log
 
 ALLOWED_EXT = {".jpg", ".jpeg"}
 
@@ -43,12 +43,25 @@ def list_images() -> list[dict]:
     return items
 
 
+def _display_rotation() -> int:
+    """Rotation à appliquer UNIQUEMENT à l'affichage (jamais au fichier) :
+    en mode landscape, bloomin8_optimize enregistre volontairement le
+    fichier pivoté de 90° (contrainte du panneau du cadre), donc un
+    visualiseur classique l'affiche de travers. On compense ici pour la
+    prévisualisation seulement."""
+    cfg = get_config()
+    return 90 if cfg["bloomin8"]["orientation"] == "landscape" else 0
+
+
 def get_thumbnail(filename: str, max_width: int = 320) -> bytes:
     path = _safe_path(filename)
     if not path.exists():
         raise GalleryError("Image introuvable.")
     with Image.open(path) as img:
         img = img.convert("RGB")
+        rot = _display_rotation()
+        if rot:
+            img = img.rotate(rot, expand=True)
         ratio = max_width / img.width
         thumb = img.resize((max_width, max(1, round(img.height * ratio))))
         buf = io.BytesIO()
@@ -60,7 +73,22 @@ def get_full(filename: str) -> bytes:
     path = _safe_path(filename)
     if not path.exists():
         raise GalleryError("Image introuvable.")
-    return path.read_bytes()
+    rot = _display_rotation()
+    if not rot:
+        return path.read_bytes()
+    with Image.open(path) as img:
+        img = img.convert("RGB").rotate(rot, expand=True)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=95)
+        return buf.getvalue()
+
+
+def delete_image(filename: str) -> None:
+    path = _safe_path(filename)
+    if not path.exists():
+        raise GalleryError("Image introuvable.")
+    path.unlink()
+    log("gallery", f"Image {filename} supprimée.")
 
 
 def rotate_image(filename: str, degrees: int) -> None:

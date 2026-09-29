@@ -44,8 +44,12 @@
   .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
   .gallery-item { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--panel); }
   .gallery-item img { width: 100%; display: block; }
-  .gallery-item .controls { display: flex; justify-content: space-between; padding: 6px 8px; font-size: 11px; }
-  .gallery-item .controls button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 14px; }
+  .gallery-item .controls { display: flex; align-items: center; justify-content: space-between; padding: 8px; font-size: 11px; gap: 4px; }
+  .gallery-item .controls .size { color: var(--muted); flex: 1; text-align: center; }
+  .gallery-item .controls button { background: var(--accent-soft); border: none; color: var(--accent); cursor: pointer; font-size: 20px; line-height: 1; padding: 8px 10px; border-radius: 6px; }
+  .gallery-item .controls button:hover { filter: brightness(1.08); }
+  .gallery-item .controls button.delete { background: var(--danger-soft); color: var(--danger); font-size: 16px; }
+  .gallery-item img.rotating { opacity: 0.4; transition: opacity .15s; }
 </style>
 </head>
 <body>
@@ -112,6 +116,7 @@
     <div class="card">
       <h2>Relancer le pull</h2>
       <p class="muted">Envoie immédiatement un ordre de réveil au cadre (prochain contact dans ~2 minutes). La relance automatique après une longue absence est aussi active en tâche de fond (voir configuration de l'add-on).</p>
+      <p class="muted">⚠️ Le cadre doit déjà être <strong>sorti de veille manuellement</strong> (écran allumé) avant de cliquer — cette commande ne le réveille pas physiquement, elle ne fait que programmer son prochain contact avec Home Assistant.</p>
       <div class="row">
         <button class="action" onclick="sendRelance()">🔁 Relancer maintenant</button>
         <span id="relance-status" class="muted"></span>
@@ -276,6 +281,21 @@ async function restartHA() {
   $('yaml-banner').textContent = '♻️ Redémarrage en cours…';
 }
 
+function galleryItemHtml(img) {
+  // ?v=<mtime> force le navigateur à recharger la miniature après une
+  // rotation/suppression au lieu de servir une version en cache (c'était
+  // la cause du "je ne vois rien tant que je ne change pas d'onglet").
+  const v = img.modified;
+  return `
+      <img src="api/gallery/thumb/${encodeURIComponent(img.filename)}?v=${v}" loading="lazy">
+      <div class="controls">
+        <button title="Tourner à gauche" onclick="rotate(this, '${img.filename}', -90)">⟲</button>
+        <span class="size">${img.size_kb} Ko</span>
+        <button title="Tourner à droite" onclick="rotate(this, '${img.filename}', 90)">⟳</button>
+        <button class="delete" title="Supprimer" onclick="deleteImage(this, '${img.filename}')">🗑</button>
+      </div>`;
+}
+
 async function loadGallery() {
   const r = await fetch('api/gallery');
   const data = await r.json();
@@ -284,24 +304,37 @@ async function loadGallery() {
   for (const img of data.images) {
     const div = document.createElement('div');
     div.className = 'gallery-item';
-    div.innerHTML = `
-      <img src="api/gallery/thumb/${encodeURIComponent(img.filename)}" loading="lazy">
-      <div class="controls">
-        <button onclick="rotate('${img.filename}', -90)">⟲</button>
-        <span>${img.size_kb} Ko</span>
-        <button onclick="rotate('${img.filename}', 90)">⟳</button>
-      </div>`;
+    div.dataset.filename = img.filename;
+    div.innerHTML = galleryItemHtml(img);
     grid.appendChild(div);
   }
 }
 
-async function rotate(filename, degrees) {
-  await fetch('api/gallery/rotate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename, degrees }),
-  });
-  loadGallery();
+async function rotate(btn, filename, degrees) {
+  const item = btn.closest('.gallery-item');
+  const img = item.querySelector('img');
+  img.classList.add('rotating');
+  btn.disabled = true;
+  try {
+    await fetch('api/gallery/rotate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename, degrees }),
+    });
+    // Recharge juste cette miniature (cache-bustée par l'heure courante) au
+    // lieu de toute la galerie — la rotation apparaît immédiatement.
+    img.src = `api/gallery/thumb/${encodeURIComponent(filename)}?v=${Date.now()}`;
+    img.onload = () => img.classList.remove('rotating');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteImage(btn, filename) {
+  if (!confirm(`Supprimer définitivement ${filename} ?`)) return;
+  btn.disabled = true;
+  await fetch(`api/gallery/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+  btn.closest('.gallery-item').remove();
 }
 
 loadStatus();

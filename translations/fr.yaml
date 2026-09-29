@@ -106,7 +106,9 @@ configuration:
     description: Coordonnées réseau du cadre, pour la relance manuelle/auto.
     ip:
       name: Adresse IP du cadre
-      description: Ex. 192.168.1.136 — celle utilisée dans bloomin8_pull.
+      description: >-
+        Juste l'adresse, sans http:// devant. Ex. 192.168.1.136 — celle
+        utilisée dans bloomin8_pull.
     token:
       name: Token
       description: >-
@@ -129,8 +131,11 @@ configuration:
     ha_device_id:
       name: Device ID du cadre
       description: >-
-        Le numéro de série du cadre tel qu'il apparaît comme device_id
-        dans ta config bloomin8_pull, ex. CB29695B3322ADA29D9578BD1A7B59F2.
+        La CLÉ (pas le "name:") du device dans le bloc "devices:" de ton
+        fichier YAML bloomin8_pull — le numéro de série du cadre. Ex. si
+        ton YAML contient "devices: CB29695B3322ADA29D9578BD1A7B59F2:
+        name: Cadre ...", la valeur à mettre ici est
+        CB29695B3322ADA29D9578BD1A7B59F2 (pas "Cadre").
     auto_relance_enabled:
       name: Relance auto activée
       description: >-
@@ -144,6 +149,8 @@ configuration:
     notify_service:
       name: Service de notification HA
       description: >-
-        Service notify.* à appeler pour t'avertir du résultat d'une
-        relance (succès/échec). Ex. notify.mobile_app_sm_g991b — laisse
-        vide pour ne pas notifier.
+        Nom COMPLET du service, avec le préfixe "notify." inclus — pas
+        juste la fin. Correct : notify.mobile_app_sm_g991b. Incorrect :
+        mobile_app_sm_g991b (ne marchera pas). Tu trouves le nom exact
+        dans Outils de développement → Actions, en cherchant "notify".
+        Laisse vide pour ne pas notifier.

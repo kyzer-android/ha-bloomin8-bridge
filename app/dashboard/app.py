@@ -206,6 +206,15 @@ def api_gallery_rotate(body: RotateRequest):
     return {"status": "ok"}
 
 
+@app.delete("/api/gallery/{filename}")
+def api_gallery_delete(filename: str):
+    try:
+        gallery.delete_image(filename)
+    except gallery.GalleryError as e:
+        raise HTTPException(400, str(e))
+    return {"status": "ok"}
+
+
 # ------------------------------------------------------------- static -----
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
