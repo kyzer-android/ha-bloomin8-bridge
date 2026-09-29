@@ -1,6 +1,6 @@
 # BLOOMIN8 Immich Bridge
 
-Home Assistant add-on that connects [Immich](https://immich.app) to a BLOOMIN8 e-ink photo frame: it builds an album from a recognized person, optimizes photos for the Spectra 6 e-ink display, and lets you resend and manage what's on the frame — all from a panel embedded directly in Home Assistant.
+Home Assistant add-on that connects [Immich](https://immich.app) to a BLOOMIN8 e-ink photo frame: it builds an album from a recognized person, optimizes photos for the Spectra 6 e-ink display, and lets you resend and manage what's on the frame — all from a panel embedded directly in Home Assistant. Requires the [`bloomin8_pull`](https://github.com/fwmone/bloomin8_pull) HACS integration, which handles the actual delivery of photos to the frame.
 
 🇫🇷 [Français](#français) · 🇬🇧 [English](#english)
 
@@ -8,7 +8,7 @@ Home Assistant add-on that connects [Immich](https://immich.app) to a BLOOMIN8 e
 
 ## Français
 
-Add-on Home Assistant qui relie [Immich](https://immich.app) à un cadre photo e-ink BLOOMIN8 : constitution d'un album par reconnaissance de personne, optimisation des photos pour l'écran e-ink Spectra 6, et gestion de ce qui est envoyé au cadre — le tout depuis un panneau intégré directement dans Home Assistant.
+Add-on Home Assistant qui relie [Immich](https://immich.app) à un cadre photo e-ink BLOOMIN8 : constitution d'un album par reconnaissance de personne, optimisation des photos pour l'écran e-ink Spectra 6, et gestion de ce qui est envoyé au cadre — le tout depuis un panneau intégré directement dans Home Assistant. Nécessite l'intégration HACS [`bloomin8_pull`](https://github.com/fwmone/bloomin8_pull), qui assure la livraison effective des photos au cadre.
 
 ### Fonctionnalités
 
@@ -85,7 +85,7 @@ Add-on Home Assistant qui relie [Immich](https://immich.app) à un cadre photo e
 
 - Home Assistant OS ou Supervised (add-on Supervisor)
 - Une instance [Immich](https://immich.app) accessible depuis Home Assistant
-- L'intégration `bloomin8_pull` installée et configurée pour utiliser la relance et l'éditeur YAML
+- L'intégration HACS [`bloomin8_pull`](https://github.com/fwmone/bloomin8_pull) installée et configurée — c'est elle qui livre effectivement les photos au cadre
 
 ### Sécurité
 
@@ -176,7 +176,7 @@ Home Assistant add-on that connects [Immich](https://immich.app) to a BLOOMIN8 e
 
 - Home Assistant OS or Supervised (add-on support)
 - An [Immich](https://immich.app) instance reachable from Home Assistant
-- The `bloomin8_pull` integration installed and configured to use the refresh button and YAML editor
+- The [`bloomin8_pull`](https://github.com/fwmone/bloomin8_pull) HACS integration installed and configured — it's what actually delivers photos to the frame
 
 ### Security
 
