@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLOOMIN8 Bridge</title>
+<style>
+  :root {
+    --bg: #f4f5f3; --panel: #fff; --border: #dde1dc; --text: #1c211d;
+    --muted: #5b645c; --accent: #2f6f4f; --accent-soft: #e4f0e8;
+    --danger: #c0392b; --danger-soft: #fbe5e2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171b; --panel: #1c2126; --border: #2c333a; --text: #e9ede8;
+      --muted: #9aa69c; --accent: #7fc79c; --accent-soft: #22321f;
+      --danger: #e08a7e; --danger-soft: #3a201d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
+  header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0; font-size: 18px; }
+  nav { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: none; padding: 12px 14px; font-size: 14px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  main { padding: 16px 20px; max-width: 900px; margin: 0 auto; }
+  .tab { display: none; flex-direction: column; gap: 14px; }
+  .tab.active { display: flex; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card h2 { margin: 0 0 8px; font-size: 15px; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .pill { font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+  .pill.off { background: var(--danger-soft); color: var(--danger); }
+  button.action { font-size: 13px; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+  button.action:hover { filter: brightness(1.05); }
+  button.action.danger { background: var(--danger-soft); color: var(--danger); }
+  pre.log { background: #10141c; color: #d7dee0; font-size: 12px; padding: 10px; border-radius: 6px; max-height: 260px; overflow: auto; white-space: pre-wrap; }
+  .muted { color: var(--muted); font-size: 13px; }
+  input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: var(--text); }
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 2px; }
+  .field { display: flex; flex-direction: column; gap: 2px; }
+  .banner { background: var(--danger-soft); color: var(--danger); padding: 10px 12px; border-radius: 8px; font-size: 13px; display: none; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .gallery-item { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--panel); }
+  .gallery-item img { width: 100%; display: block; }
+  .gallery-item .controls { display: flex; justify-content: space-between; padding: 6px 8px; font-size: 11px; }
+  .gallery-item .controls button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🖼️ BLOOMIN8 Immich Bridge</h1>
+</header>
+
+<nav>
+  <button data-tab="apercu" class="active">Aperçu</button>
+  <button data-tab="execution">Exécution</button>
+  <button data-tab="relance">Relance BLOOMIN8</button>
+  <button data-tab="yaml">Config YAML</button>
+  <button data-tab="galerie">Galerie</button>
+</nav>
+
+<main>
+
+  <div id="apercu" class="tab active">
+    <div class="card">
+      <h2>Person → Album</h2>
+      <div class="row">
+        <span id="p2a-enabled" class="pill">—</span>
+        <span class="muted" id="p2a-schedule"></span>
+      </div>
+      <div class="muted" id="p2a-links"></div>
+    </div>
+    <div class="card">
+      <h2>Optimisation BLOOMIN8</h2>
+      <div class="row">
+        <span id="b8-enabled" class="pill">—</span>
+        <span class="muted" id="b8-schedule"></span>
+      </div>
+      <div class="muted" id="b8-details"></div>
+    </div>
+    <div class="card">
+      <h2>Dernier pull du cadre</h2>
+      <div id="pull-status" class="muted">Chargement…</div>
+    </div>
+  </div>
+
+  <div id="execution" class="tab">
+    <div class="card">
+      <h2>Person → Album</h2>
+      <div class="row">
+        <button class="action" onclick="runScript('person_to_album')">▶️ Exécuter maintenant</button>
+        <button class="action danger" onclick="stopScript('person_to_album')">⏹ Stop</button>
+        <span id="p2a-run-status" class="muted"></span>
+      </div>
+      <pre class="log" id="p2a-log"></pre>
+    </div>
+    <div class="card">
+      <h2>Optimisation BLOOMIN8</h2>
+      <div class="row">
+        <button class="action" onclick="runScript('bloomin8_optimize')">▶️ Exécuter maintenant</button>
+        <button class="action danger" onclick="stopScript('bloomin8_optimize')">⏹ Stop</button>
+        <span id="b8-run-status" class="muted"></span>
+      </div>
+      <pre class="log" id="b8-log"></pre>
+    </div>
+  </div>
+
+  <div id="relance" class="tab">
+    <div class="card">
+      <h2>Relancer le pull</h2>
+      <p class="muted">Envoie immédiatement un ordre de réveil au cadre (prochain contact dans ~2 minutes). La relance automatique après une longue absence est aussi active en tâche de fond (voir configuration de l'add-on).</p>
+      <div class="row">
+        <button class="action" onclick="sendRelance()">🔁 Relancer maintenant</button>
+        <span id="relance-status" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="yaml" class="tab">
+    <div id="yaml-banner" class="banner"></div>
+    <div class="card">
+      <h2>Éditer le device bloomin8_pull</h2>
+      <p class="muted" id="yaml-path"></p>
+      <div class="row" style="gap:16px;">
+        <div class="field"><label>device_id</label><input id="f-device-id"></div>
+        <div class="field"><label>Nom</label><input id="f-name"></div>
+        <div class="field">
+          <label>Orientation</label>
+          <select id="f-orientation"><option value="P">Portrait</option><option value="L">Paysage</option></select>
+        </div>
+        <div class="field"><label>wake_up_hours</label><input id="f-wake" placeholder="6,7,8,...,23" style="width:220px;"></div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="action" onclick="saveDevice()">💾 Enregistrer dans le YAML</button>
+        <button class="action danger" onclick="restartHA()">♻️ Redémarrer Home Assistant maintenant</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="galerie" class="tab">
+    <div class="card">
+      <h2>Images envoyées au cadre</h2>
+      <div id="gallery-grid" class="gallery-grid"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    $(btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'yaml') loadYaml();
+    if (btn.dataset.tab === 'galerie') loadGallery();
+  });
+});
+
+async function loadStatus() {
+  const r = await fetch('/api/status');
+  const s = await r.json();
+
+  $('p2a-enabled').textContent = s.person_to_album.enabled ? 'Activé' : 'Désactivé';
+  $('p2a-enabled').classList.toggle('off', !s.person_to_album.enabled);
+  $('p2a-schedule').textContent = 'Planification : ' + s.person_to_album.schedule;
+  $('p2a-links').textContent = s.person_to_album.links_count + ' lien(s) personne→album configuré(s)';
+  $('p2a-run-status').textContent = s.person_to_album.running ? '⏳ en cours…' : '';
+
+  $('b8-enabled').textContent = s.bloomin8.enabled ? 'Activé' : 'Désactivé';
+  $('b8-enabled').classList.toggle('off', !s.bloomin8.enabled);
+  $('b8-schedule').textContent = 'Planification : ' + s.bloomin8.schedule;
+  $('b8-details').textContent = `Album ${s.bloomin8.album_id || '(non défini)'} · orientation ${s.bloomin8.orientation} · ${s.bloomin8.destination_path}`;
+  $('b8-run-status').textContent = s.bloomin8.running ? '⏳ en cours…' : '';
+}
+
+async function loadPullStatus() {
+  const r = await fetch('/api/pull-status');
+  const s = await r.json();
+  const el = $('pull-status');
+  if (!s.entity_id) {
+    el.textContent = "Impossible de déterminer l'entité (device_id non configuré ou introuvable dans le YAML).";
+  } else if (!s.last_seen) {
+    el.textContent = `Aucun pull réussi enregistré (entité ${s.entity_id}).`;
+  } else {
+    const d = new Date(s.last_seen);
+    el.textContent = `Dernier pull réussi : ${d.toLocaleString('fr-FR')} (${s.entity_id})`;
+  }
+}
+
+async function runScript(name) {
+  await fetch(`/api/run/${name}`, { method: 'POST' });
+  loadStatus();
+  pollLogs(name);
+}
+async function stopScript(name) {
+  await fetch(`/api/stop/${name}`, { method: 'POST' });
+  loadStatus();
+}
+
+async function pollLogs(name) {
+  const logEl = name === 'person_to_album' ? $('p2a-log') : $('b8-log');
+  const r = await fetch(`/api/logs/${name}?lines=100`);
+  const data = await r.json();
+  logEl.textContent = data.lines.join('');
+  logEl.scrollTop = logEl.scrollHeight;
+  loadStatus();
+}
+
+async function sendRelance() {
+  $('relance-status').textContent = 'Envoi…';
+  try {
+    const r = await fetch('/api/relance', { method: 'POST' });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Erreur');
+    $('relance-status').textContent = '✅ ' + data.message;
+  } catch (e) {
+    $('relance-status').textContent = '❌ ' + e.message;
+  }
+  loadPullStatus();
+}
+
+let currentYamlPath = '';
+async function loadYaml() {
+  const r = await fetch('/api/yaml/devices');
+  const data = await r.json();
+  if (!r.ok) {
+    $('yaml-banner').style.display = 'block';
+    $('yaml-banner').textContent = '⚠️ ' + (data.detail || 'Erreur de lecture du YAML');
+    return;
+  }
+  $('yaml-banner').style.display = 'none';
+  currentYamlPath = data.path;
+  $('yaml-path').textContent = 'Fichier : ' + data.path;
+
+  const ids = Object.keys(data.devices);
+  if (ids.length) {
+    const id = ids[0];
+    const dev = data.devices[id];
+    $('f-device-id').value = id;
+    $('f-name').value = dev.name;
+    $('f-orientation').value = dev.orientation;
+    $('f-wake').value = dev.wake_up_hours;
+  }
+}
+
+async function saveDevice() {
+  const body = {
+    device_id: $('f-device-id').value.trim(),
+    name: $('f-name').value.trim(),
+    orientation: $('f-orientation').value,
+    wake_up_hours: $('f-wake').value.trim(),
+  };
+  const r = await fetch('/api/yaml/devices', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json();
+  $('yaml-banner').style.display = 'block';
+  $('yaml-banner').textContent = r.ok
+    ? '⚠️ ' + data.message
+    : '❌ ' + (data.detail || 'Erreur');
+}
+
+async function restartHA() {
+  if (!confirm("Redémarrer Home Assistant maintenant ? Ça coupe tout HA quelques dizaines de secondes.")) return;
+  await fetch('/api/ha/restart', { method: 'POST' });
+  $('yaml-banner').style.display = 'block';
+  $('yaml-banner').textContent = '♻️ Redémarrage en cours…';
+}
+
+async function loadGallery() {
+  const r = await fetch('/api/gallery');
+  const data = await r.json();
+  const grid = $('gallery-grid');
+  grid.innerHTML = '';
+  for (const img of data.images) {
+    const div = document.createElement('div');
+    div.className = 'gallery-item';
+    div.innerHTML = `
+      <img src="/api/gallery/thumb/${encodeURIComponent(img.filename)}" loading="lazy">
+      <div class="controls">
+        <button onclick="rotate('${img.filename}', -90)">⟲</button>
+        <span>${img.size_kb} Ko</span>
+        <button onclick="rotate('${img.filename}', 90)">⟳</button>
+      </div>`;
+    grid.appendChild(div);
+  }
+}
+
+async function rotate(filename, degrees) {
+  await fetch('/api/gallery/rotate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename, degrees }),
+  });
+  loadGallery();
+}
+
+loadStatus();
+loadPullStatus();
+setInterval(loadStatus, 8000);
+setInterval(loadPullStatus, 30000);
+setInterval(() => {
+  if ($('execution').classList.contains('active')) {
+    pollLogs('person_to_album');
+    pollLogs('bloomin8_optimize');
+  }
+}, 4000);
+</script>
+
+</body>
+</html>

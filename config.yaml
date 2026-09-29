@@ -1,0 +1,96 @@
+name: "BLOOMIN8 Immich Bridge"
+version: "1.0.0"
+slug: "bloomin8_bridge"
+description: "Album Immich par reconnaissance de personne + optimisation photo pour cadre e-ink BLOOMIN8, relance et galerie de rotation intégrées"
+url: "https://github.com/mathieu/ha-bloomin8-bridge"
+arch:
+  - aarch64
+  - amd64
+  - armv7
+startup: application
+boot: auto
+init: false
+
+# Panneau intégré dans la barre latérale HA, authentifié via ta session HA
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:image-frame
+panel_title: BLOOMIN8
+
+# Donne à l'add-on un token pour appeler l'API HA (http://supervisor/core/api)
+# sans que l'utilisateur ait à créer un long-lived token à la main.
+homeassistant_api: true
+
+# config:rw  -> lecture/écriture du fichier YAML bloomin8_pull (jamais configuration.yaml)
+# media:rw   -> écriture des photos optimisées dans /media/... (lu par bloomin8_pull)
+map:
+  - config:rw
+  - media:rw
+
+options:
+  immich:
+    server: "http://homeassistant.local:2283"
+    api_key: ""
+  person_to_album:
+    enabled: true
+    schedule: "*/30 * * * *"
+    links:
+      - description: "Exemple"
+        person_id: ""
+        album_id: ""
+  bloomin8:
+    enabled: true
+    schedule: "0 4 * * *"
+    album_id: ""
+    orientation: "landscape"
+    destination_path: "/media/bloomin8"
+    resolution_width: 1600
+    resolution_height: 1200
+    color_gamma: 0.85
+    color_saturation: 1.15
+    color_lift: 13
+    color_lift_threshold: 90
+  frame:
+    ip: ""
+    token: ""
+  relance:
+    ha_url: "http://homeassistant.local:8123"
+    ha_yaml_path: "custom_yaml/bloomin8.yaml"
+    ha_device_id: ""
+    auto_relance_enabled: true
+    auto_relance_after_hours: 12
+    notify_service: ""
+
+schema:
+  immich:
+    server: "url"
+    api_key: "password"
+  person_to_album:
+    enabled: "bool"
+    schedule: "str"
+    links:
+      - description: "str"
+        person_id: "str"
+        album_id: "str"
+  bloomin8:
+    enabled: "bool"
+    schedule: "str"
+    album_id: "str"
+    orientation: "list(portrait|landscape)"
+    destination_path: "str"
+    resolution_width: "int"
+    resolution_height: "int"
+    color_gamma: "float"
+    color_saturation: "float"
+    color_lift: "int"
+    color_lift_threshold: "int"
+  frame:
+    ip: "str"
+    token: "password"
+  relance:
+    ha_url: "url"
+    ha_yaml_path: "str"
+    ha_device_id: "str"
+    auto_relance_enabled: "bool"
+    auto_relance_after_hours: "int"
+    notify_service: "str"

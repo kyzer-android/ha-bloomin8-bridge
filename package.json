@@ -1,0 +1,9 @@
+{
+  "name": "bloomin8-optimize",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "node-fetch": "^2.7.0"
+  }
+}
