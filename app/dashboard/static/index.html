@@ -164,7 +164,7 @@ document.querySelectorAll('nav button').forEach(btn => {
 });
 
 async function loadStatus() {
-  const r = await fetch('/api/status');
+  const r = await fetch('api/status');
   const s = await r.json();
 
   $('p2a-enabled').textContent = s.person_to_album.enabled ? 'Activé' : 'Désactivé';
@@ -181,7 +181,7 @@ async function loadStatus() {
 }
 
 async function loadPullStatus() {
-  const r = await fetch('/api/pull-status');
+  const r = await fetch('api/pull-status');
   const s = await r.json();
   const el = $('pull-status');
   if (!s.entity_id) {
@@ -195,18 +195,18 @@ async function loadPullStatus() {
 }
 
 async function runScript(name) {
-  await fetch(`/api/run/${name}`, { method: 'POST' });
+  await fetch(`api/run/${name}`, { method: 'POST' });
   loadStatus();
   pollLogs(name);
 }
 async function stopScript(name) {
-  await fetch(`/api/stop/${name}`, { method: 'POST' });
+  await fetch(`api/stop/${name}`, { method: 'POST' });
   loadStatus();
 }
 
 async function pollLogs(name) {
   const logEl = name === 'person_to_album' ? $('p2a-log') : $('b8-log');
-  const r = await fetch(`/api/logs/${name}?lines=100`);
+  const r = await fetch(`api/logs/${name}?lines=100`);
   const data = await r.json();
   logEl.textContent = data.lines.join('');
   logEl.scrollTop = logEl.scrollHeight;
@@ -216,7 +216,7 @@ async function pollLogs(name) {
 async function sendRelance() {
   $('relance-status').textContent = 'Envoi…';
   try {
-    const r = await fetch('/api/relance', { method: 'POST' });
+    const r = await fetch('api/relance', { method: 'POST' });
     const data = await r.json();
     if (!r.ok) throw new Error(data.detail || 'Erreur');
     $('relance-status').textContent = '✅ ' + data.message;
@@ -228,7 +228,7 @@ async function sendRelance() {
 
 let currentYamlPath = '';
 async function loadYaml() {
-  const r = await fetch('/api/yaml/devices');
+  const r = await fetch('api/yaml/devices');
   const data = await r.json();
   if (!r.ok) {
     $('yaml-banner').style.display = 'block';
@@ -257,7 +257,7 @@ async function saveDevice() {
     orientation: $('f-orientation').value,
     wake_up_hours: $('f-wake').value.trim(),
   };
-  const r = await fetch('/api/yaml/devices', {
+  const r = await fetch('api/yaml/devices', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -271,13 +271,13 @@ async function saveDevice() {
 
 async function restartHA() {
   if (!confirm("Redémarrer Home Assistant maintenant ? Ça coupe tout HA quelques dizaines de secondes.")) return;
-  await fetch('/api/ha/restart', { method: 'POST' });
+  await fetch('api/ha/restart', { method: 'POST' });
   $('yaml-banner').style.display = 'block';
   $('yaml-banner').textContent = '♻️ Redémarrage en cours…';
 }
 
 async function loadGallery() {
-  const r = await fetch('/api/gallery');
+  const r = await fetch('api/gallery');
   const data = await r.json();
   const grid = $('gallery-grid');
   grid.innerHTML = '';
@@ -285,7 +285,7 @@ async function loadGallery() {
     const div = document.createElement('div');
     div.className = 'gallery-item';
     div.innerHTML = `
-      <img src="/api/gallery/thumb/${encodeURIComponent(img.filename)}" loading="lazy">
+      <img src="api/gallery/thumb/${encodeURIComponent(img.filename)}" loading="lazy">
       <div class="controls">
         <button onclick="rotate('${img.filename}', -90)">⟲</button>
         <span>${img.size_kb} Ko</span>
@@ -296,7 +296,7 @@ async function loadGallery() {
 }
 
 async function rotate(filename, degrees) {
-  await fetch('/api/gallery/rotate', {
+  await fetch('api/gallery/rotate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ filename, degrees }),

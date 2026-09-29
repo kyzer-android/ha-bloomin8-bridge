@@ -1,0 +1,147 @@
+configuration:
+  immich:
+    name: Immich
+    description: >-
+      Connection to your Immich server.
+    server:
+      name: Server
+      description: >-
+        Full URL of your Immich instance, including the port. E.g.
+        http://homeassistant.local:2283 or http://192.168.1.10:2283
+    api_key:
+      name: API key
+      description: >-
+        Immich API key (Account settings → API keys → New API key), with
+        read access to people/albums, and write access if you use
+        person_to_album.
+
+  person_to_album:
+    name: Person → Album
+    description: >-
+      Automatically adds photos of a recognized person to an Immich album.
+    links:
+      name: Person → album links
+      description: >-
+        One row per person to track. "description" is just a free label
+        to help you tell rows apart, it isn't used by the script.
+      items:
+        description:
+          name: Label
+          description: >-
+            Free-text name to identify the link (e.g. "My son").
+        person_id:
+          name: Person ID (Immich)
+          description: >-
+            The person's UUID in Immich. Go to Immich → Explore by people
+            → click the person → the UUID is in the browser URL after
+            /people/ (e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890).
+        album_id:
+          name: Album ID (Immich)
+          description: >-
+            UUID of the Immich album to add photos to. Open the album in
+            Immich, the UUID is in the URL after /albums/
+            (e.g. 98765432-1abc-4def-9012-345678abcdef).
+
+  bloomin8:
+    name: BLOOMIN8 optimization
+    description: >-
+      Filters the source album by orientation and optimizes photos for the
+      frame's Spectra 6 e-ink display.
+    enabled:
+      name: Enabled
+      description: Enables the scheduled optimization run.
+    schedule:
+      name: Schedule (cron)
+      description: >-
+        Standard cron expression. E.g. "0 4 * * *" = every day at 4am.
+        "*/30 * * * *" = every 30 minutes.
+    album_id:
+      name: Source album ID (Immich)
+      description: >-
+        UUID of the Immich album to use as the photo source for the frame
+        (e.g. 98765432-1abc-4def-9012-345678abcdef).
+    orientation:
+      name: Orientation
+      description: >-
+        Frame orientation — determines which subfolder (portrait/ or
+        landscape/) optimized photos are written to. Must match the
+        orientation configured in bloomin8_pull.
+    destination_path:
+      name: Destination folder
+      description: >-
+        Path under /media to write optimized photos to (must be the folder
+        watched by your bloomin8_pull integration; portrait/ and
+        landscape/ subfolders are created automatically). E.g.
+        /media/bloomin8
+    resolution_width:
+      name: Width (px)
+      description: Target width in pixels, e.g. 1600 for a 1600×1200 frame.
+    resolution_height:
+      name: Height (px)
+      description: Target height in pixels, e.g. 1200 for a 1600×1200 frame.
+    color_gamma:
+      name: Gamma
+      description: >-
+        Gamma correction applied before Spectra 6 dithering. 1.0 =
+        neutral. E.g. 0.85 to lighten slightly.
+    color_saturation:
+      name: Saturation
+      description: >-
+        Saturation multiplier. 1.0 = neutral. E.g. 1.15 for slightly more
+        vivid colors (useful since e-ink mutes them).
+    color_lift:
+      name: Black lift
+      description: >-
+        Lifts dark tones to avoid crushed blacks on screen. Range 0-255,
+        e.g. 13.
+    color_lift_threshold:
+      name: Lift threshold
+      description: >-
+        Below this brightness (0-255), the black lift is applied. E.g. 90.
+
+  frame:
+    name: BLOOMIN8 frame
+    description: Network details for the frame, used for manual/auto refresh.
+    ip:
+      name: Frame IP address
+      description: E.g. 192.168.1.136 — the one used in bloomin8_pull.
+    token:
+      name: Token
+      description: >-
+        The same access token configured on the bloomin8_pull side
+        (custom_yaml/bloomin8.yaml, access_token key).
+
+  relance:
+    name: Refresh & HA integration
+    description: >-
+      Settings to trigger a frame refresh and, optionally, edit the
+      bloomin8_pull integration's YAML file from this panel.
+    ha_url:
+      name: Home Assistant URL
+      description: E.g. http://homeassistant.local:8123
+    ha_yaml_path:
+      name: bloomin8_pull YAML path
+      description: >-
+        Path relative to /config. E.g. custom_yaml/bloomin8.yaml — leave
+        empty if you don't want to use the built-in YAML editor.
+    ha_device_id:
+      name: Frame device ID
+      description: >-
+        The frame's serial number as it appears as device_id in your
+        bloomin8_pull config, e.g. CB29695B3322ADA29D9578BD1A7B59F2.
+    auto_relance_enabled:
+      name: Auto-refresh enabled
+      description: >-
+        When enabled, automatically triggers a refresh after the frame
+        has been silent for a while (see "Auto-refresh delay" below).
+    auto_relance_after_hours:
+      name: Auto-refresh delay (hours)
+      description: >-
+        Hours without a successful pull before an automatic refresh is
+        triggered. E.g. 12.
+    notify_service:
+      name: HA notification service
+      description: >-
+        notify.* service to call to report a refresh's result
+        (success/failure). E.g. notify.mobile_app_sm_g991b — leave empty
+        to disable notifications.

@@ -1,5 +1,5 @@
 name: "BLOOMIN8 Immich Bridge"
-version: "1.0.0"
+version: "1.0.2"
 slug: "bloomin8_bridge"
 description: "Album Immich par reconnaissance de personne + optimisation photo pour cadre e-ink BLOOMIN8, relance et galerie de rotation intégrées"
 url: "https://github.com/kyzer-android/ha-bloomin8-bridge"
